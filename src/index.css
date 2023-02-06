@@ -1,0 +1,15 @@
+body {
+  margin: 0;
+}
+
+button {
+  background: none;
+}
+
+a {
+  text-decoration: none;
+  outline: none;
+}
+a:focus {
+  color: rgb(0, 28, 151) !important;
+}
