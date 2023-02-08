@@ -1,22 +1,10 @@
-import FolderCard from "../components/FolderCard";
-import { useContext, useState } from "react";
-import { notesContext } from "../Context/notesContext";
-import { DataType, NoteType } from "../Types";
 import NoteCard from "../components/NoteCard";
 import { faFolderPlus, faFileMedical } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
+import { NoteType } from "../Types";
 
-export default function NotesPage() {
-  const notesData = useContext<DataType>(notesContext);
-  const foldersNotes: (NoteType | NoteType[])[] = notesData.folders.map(
-    folder => [...folder.notes]
-  );
-  const [notes, setNotes] = useState<NoteType[]>([
-    ...notesData.notes,
-    ...foldersNotes.flat(),
-  ]);
-
+export default function NotesPage({ notes }: { notes: NoteType[] }) {
   return (
     <div className="container mt-5">
       <div className="d-flex gap-4 justify-content-end w-full">

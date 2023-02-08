@@ -1,16 +1,16 @@
 import { faFolder } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
-import { FolderType } from "../Types";
 
 interface Props {
-  folder: FolderType;
+  folder: string;
+  notesCount: number;
 }
 
-export default function FolderCard({ folder }: Props) {
+export default function FolderCard({ folder, notesCount }: Props) {
   return (
     <Link
-      to={`/folders/${folder.name}`}
+      to={`/folders/${folder}`}
       className="d-flex flex-column position-relative"
       style={{
         width: "max-content",
@@ -23,7 +23,7 @@ export default function FolderCard({ folder }: Props) {
         style={{ fontSize: "80px", zIndex: -1 }}
       />
       <span style={{ position: "absolute", top: "10px", left: "10px" }}>
-        {folder.notes.length}
+        {notesCount}
       </span>
       <div
         style={{
@@ -36,7 +36,7 @@ export default function FolderCard({ folder }: Props) {
           alignItems: "flex-end",
         }}
       >
-        <span style={{ lineHeight: "1" }}>{folder.name}</span>
+        <span style={{ lineHeight: "1" }}>{folder}</span>
       </div>
     </Link>
   );

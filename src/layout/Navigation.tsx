@@ -9,18 +9,20 @@ import { Link } from "react-router-dom";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import { useContext, useEffect, useState } from "react";
 import { notesContext } from "../Context/notesContext";
-import { FolderType } from "../Types";
 
 interface Props {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  activeFolder: FolderType | undefined;
+  activeFolder: string | undefined;
+  folders: string[];
 }
 
-export default function Navigation({ isOpen, setIsOpen, activeFolder }: Props) {
-  const foldersData = useContext(notesContext);
-  const [folders, setFolders] = useState(foldersData.folders);
-
+export default function Navigation({
+  isOpen,
+  setIsOpen,
+  activeFolder,
+  folders,
+}: Props) {
   return (
     <>
       <FontAwesomeIcon
@@ -79,19 +81,18 @@ export default function Navigation({ isOpen, setIsOpen, activeFolder }: Props) {
           >
             All Folders
           </Link>
-          {folders.map(folder => (
-            <Link
-              key={folder.name}
-              to={`folders/${folder.name}`}
-              className={`${styles.folders} ${
-                activeFolder?.name == folder.name
-                  ? "text-black"
-                  : "border-primary"
-              }`}
-            >
-              {folder.name}
-            </Link>
-          ))}
+          {folders &&
+            folders.map(folder => (
+              <Link
+                key={folder}
+                to={`folders/${folder}`}
+                className={`${styles.folders} ${
+                  activeFolder == folder ? "text-black" : "border-primary"
+                }`}
+              >
+                {folder}
+              </Link>
+            ))}
         </Offcanvas.Body>
       </Offcanvas>
     </>
