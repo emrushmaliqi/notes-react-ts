@@ -22,10 +22,10 @@ function App() {
   );
 
   useEffect(() => {
-    const folders = localStorage.getItem("folders");
-    const notes = localStorage.getItem("notes");
-    if (folders) setFolders(JSON.parse(folders));
-    if (notes) setNotes(JSON.parse(notes));
+    const localFolders = localStorage.getItem("folders");
+    const localNotes = localStorage.getItem("notes");
+    if (localFolders) setFolders(JSON.parse(localFolders));
+    if (localNotes) setNotes(JSON.parse(localNotes));
   }, []);
 
   useEffect(() => {
@@ -49,7 +49,17 @@ function App() {
       />
       <Suspense fallback={<h1 style={{ marginLeft: "400px" }}>Loading...</h1>}>
         <Routes>
-          <Route path="/" element={<Home folders={folders} notes={notes} />} />
+          <Route
+            path="/"
+            element={
+              <Home
+                folders={folders}
+                notes={notes}
+                setNotes={notes => setNotes(notes)}
+                setFolders={folders => setFolders(folders)}
+              />
+            }
+          />
           <Route
             path="/folders/:folder"
             element={

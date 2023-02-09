@@ -1,3 +1,5 @@
+import { faXmarkCircle } from "@fortawesome/free-regular-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Card from "react-bootstrap/Card";
 import { Link } from "react-router-dom";
 import { NoteType } from "../Types";

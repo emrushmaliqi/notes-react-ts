@@ -5,3 +5,10 @@ export function useLocalNotes(): NoteType[] {
   if (localData) return JSON.parse(localData);
   return [];
 }
+
+export function useNoteDelete(noteName: string) {
+  const prevNotes = useLocalNotes();
+  const notes = prevNotes.filter(note => note.name !== noteName);
+  localStorage.setItem("notes", JSON.stringify(notes));
+  return notes;
+}

@@ -17,6 +17,7 @@ export default function Note({
   const [note, setNote] = useState(
     notes.find(note => note.name == params.note)
   );
+
   if (note) {
     if (isEditing)
       return (

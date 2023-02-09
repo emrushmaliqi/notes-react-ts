@@ -2,13 +2,12 @@ import { useEffect, useRef } from "react";
 import Button from "react-bootstrap/Button";
 import { useLocalNotes } from "../hooks";
 import { NoteType } from "../Types";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 interface Props {
   setNotes: React.Dispatch<React.SetStateAction<NoteType[]>>;
   notes?: NoteType[];
   note?: NoteType;
-  folder?: string;
   setIsEditing?: (state: boolean) => void;
   setNote?: (state: NoteType) => void;
 }
@@ -17,11 +16,11 @@ export default function CreateFile({
   setNotes,
   notes,
   note,
-  folder,
   setIsEditing,
   setNote,
 }: Props) {
   const navigate = useNavigate();
+  const location = useLocation();
   const titleRef = useRef<HTMLInputElement>(null);
   const noteRef = useRef<HTMLTextAreaElement>(null);
 
@@ -32,9 +31,9 @@ export default function CreateFile({
     }
   }, []);
 
-  function handleSave(): void {
-    const data = useLocalNotes();
+  function addFile() {
     if (titleRef.current && noteRef.current) {
+      const prevLocal = useLocalNotes();
       const inputNote: NoteType = {
         name: titleRef.current.value,
         content: noteRef.current.value,
@@ -42,11 +41,21 @@ export default function CreateFile({
       if (notes && notes.find(note => note.name == inputNote.name)) {
         const date = new Date();
         inputNote.name += " - " + date.toLocaleString();
+        inputNote.name = inputNote.name.replaceAll("/", "-");
       }
-      localStorage.setItem("notes", JSON.stringify([inputNote, ...data]));
+      if (location.state?.folder) {
+        inputNote.folder = location.state.folder;
+        navigate(`/folders/${location.state.folder}`, { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
+      localStorage.setItem("notes", JSON.stringify([inputNote, ...prevLocal]));
       setNotes(useLocalNotes());
-      navigate("/", { replace: true });
-    } else if (note && setIsEditing && setNote && noteRef.current) {
+    }
+  }
+
+  function editFile() {
+    if (note && setIsEditing && setNote && noteRef.current) {
       const prevLocal = useLocalNotes();
       const updatedNotes = prevLocal.map(n => {
         if (note.name === n.name && noteRef.current) {
@@ -59,6 +68,11 @@ export default function CreateFile({
       setNote({ name: note.name, content: noteRef.current.value });
       setIsEditing(false);
     }
+  }
+
+  function handleSave(): void {
+    if (note) return editFile();
+    addFile();
   }
 
   return (

@@ -16,7 +16,7 @@ export default function Folder({ folder, notes }: Props) {
   return (
     <div className="container mt-5">
       <div className="d-flex gap-4 justify-content-end w-full">
-        <Link to={"/newfile"}>
+        <Link to={"/newfile"} state={{ folder: folder }}>
           <FontAwesomeIcon icon={faFileMedical} style={{ fontSize: "1.5em" }} />
         </Link>
       </div>
