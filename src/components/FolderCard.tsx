@@ -36,7 +36,9 @@ export default function FolderCard({ folder, notesCount }: Props) {
           alignItems: "flex-end",
         }}
       >
-        <span style={{ lineHeight: "1" }}>{folder}</span>
+        <span style={{ lineHeight: "1", overflow: "hidden", width: "60px" }}>
+          {folder}
+        </span>
       </div>
     </Link>
   );

@@ -3,13 +3,15 @@ import {
   faFolderPlus,
   faFileMedical,
   faPencil,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
+import { Button, Modal } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import FolderCard from "../components/FolderCard";
 import NoteCard from "../components/NoteCard";
-import { useNoteDelete } from "../hooks";
+import { useFolderDelete, useLocalNotes, useNoteDelete } from "../hooks";
 import { NoteType } from "../Types";
 
 interface Props {
@@ -20,61 +22,157 @@ interface Props {
 }
 
 export default function Home({ folders, notes, setFolders, setNotes }: Props) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [noteEditing, setNoteEditing] = useState(false);
+  const [folderEditing, setFolderEditing] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [activeNote, setActiveNote] = useState<NoteType | string | null>(null);
+  function handleClose() {
+    setShowModal(false);
+    setActiveNote(null);
+  }
+
+  function handleShowModal(note: NoteType | string) {
+    setActiveNote(note);
+    setShowModal(true);
+  }
   return (
-    <div className="container mt-5">
-      <div className="d-flex gap-4 justify-content-end w-full">
-        <Link to={"/newfolder"} style={{ alignSelf: "flex-start" }}>
-          <FontAwesomeIcon icon={faFolderPlus} style={{ fontSize: "1.6em" }} />
-        </Link>
-        <Link to={"/newfile"}>
-          <FontAwesomeIcon icon={faFileMedical} style={{ fontSize: "1.5em" }} />
-        </Link>
-      </div>
-      <h2 className="my-5">Folders</h2>
-      <div className="d-flex flex-wrap gap-5">
-        {folders &&
-          folders.map(folder => (
-            <FolderCard
-              key={folder}
-              folder={folder}
-              notesCount={notes.filter(note => note.folder === folder).length}
+    <>
+      <div className="container mt-5">
+        <div className="d-flex gap-4 justify-content-end w-full">
+          <Link to={"/newfolder"} style={{ alignSelf: "flex-start" }}>
+            <FontAwesomeIcon
+              icon={faFolderPlus}
+              style={{ fontSize: "1.6em" }}
             />
-          ))}
-      </div>
-      <div className="d-flex justify-content-between align-items-center">
-        <h2 className="my-5">Notes</h2>
-        <FontAwesomeIcon
-          icon={faPencil}
-          style={{ fontSize: "22px", cursor: "pointer" }}
-          onClick={() => setIsEditing(prev => !prev)}
-        />
-      </div>
-      <div className="mt-5 d-flex flex-wrap gap-4">
-        {notes &&
-          notes
-            .filter(note => note.folder === undefined)
-            .map(note => (
-              <div className="position-relative">
-                {isEditing && (
+          </Link>
+          <Link to={"/newfile"}>
+            <FontAwesomeIcon
+              icon={faFileMedical}
+              style={{ fontSize: "1.5em" }}
+            />
+          </Link>
+        </div>
+
+        <div className="d-flex justify-content-between align-items-center">
+          <h2 className="my-5">Folders</h2>
+          {folderEditing ? (
+            <FontAwesomeIcon
+              icon={faXmark}
+              style={{ fontSize: "26px", cursor: "pointer" }}
+              onClick={() => setFolderEditing(false)}
+            />
+          ) : (
+            <FontAwesomeIcon
+              icon={faPencil}
+              style={{ fontSize: "22px", cursor: "pointer" }}
+              onClick={() => setFolderEditing(true)}
+            />
+          )}
+        </div>
+        <div className="d-flex flex-wrap gap-5">
+          {folders &&
+            folders.map(folder => (
+              <div className="position-relative" key={folder}>
+                <FolderCard
+                  key={folder}
+                  folder={folder}
+                  notesCount={
+                    notes.filter(note => note.folder === folder).length
+                  }
+                />
+                {folderEditing && (
                   <FontAwesomeIcon
                     icon={faXmarkCircle}
-                    onClick={() => setNotes(useNoteDelete(note.name))}
+                    onClick={() => handleShowModal(folder)}
                     style={{
                       fontSize: "22px",
                       position: "absolute",
                       backgroundColor: "white",
-                      right: -11,
-                      top: -11,
+                      right: -10,
+                      top: 5,
+                      borderRadius: "100%",
                       zIndex: 1,
                       cursor: "pointer",
                     }}
                   />
                 )}
-                <NoteCard key={note.name} note={note} />
               </div>
             ))}
+        </div>
+        <div className="d-flex justify-content-between align-items-center">
+          <h2 className="my-5">Notes</h2>
+          {noteEditing ? (
+            <FontAwesomeIcon
+              icon={faXmark}
+              style={{ fontSize: "26px", cursor: "pointer" }}
+              onClick={() => setNoteEditing(false)}
+            />
+          ) : (
+            <FontAwesomeIcon
+              icon={faPencil}
+              style={{ fontSize: "22px", cursor: "pointer" }}
+              onClick={() => setNoteEditing(true)}
+            />
+          )}
+        </div>
+        <div className="mt-5 d-flex flex-wrap gap-4">
+          {notes &&
+            notes
+              .filter(note => note.folder === undefined)
+              .map(note => (
+                <div key={note.name} className="position-relative">
+                  {noteEditing && (
+                    <FontAwesomeIcon
+                      icon={faXmarkCircle}
+                      onClick={() => handleShowModal(note)}
+                      style={{
+                        fontSize: "22px",
+                        position: "absolute",
+                        backgroundColor: "white",
+                        right: -11,
+                        top: -11,
+                        zIndex: 1,
+                        cursor: "pointer",
+                      }}
+                    />
+                  )}
+                  <NoteCard key={note.name} note={note} />
+                </div>
+              ))}
+        </div>
       </div>
-    </div>
+      <Modal show={showModal} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            Delete{" "}
+            {typeof activeNote == "string"
+              ? `Folder ${activeNote}`
+              : `Note ${activeNote?.name}`}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Press Save Changes to delete Note</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              if (activeNote) {
+                if (typeof activeNote == "string") {
+                  setFolders(useFolderDelete(activeNote));
+                  setNotes(useLocalNotes());
+                } else {
+                  setNotes(useNoteDelete(activeNote.name));
+                }
+              }
+              handleClose();
+            }}
+          >
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 }

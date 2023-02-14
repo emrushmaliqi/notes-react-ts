@@ -65,11 +65,15 @@ function App() {
             element={
               <Folder
                 folder={activeFolder}
+                setNotes={setNotes}
                 notes={notes.filter(note => note.folder == activeFolder)}
               />
             }
           />
-          <Route path="/newfolder" element={<CreateFolder />} />
+          <Route
+            path="/newfolder"
+            element={<CreateFolder folders={folders} setFolders={setFolders} />}
+          />
           <Route
             path="/newfile"
             element={<CreateFile setNotes={setNotes} notes={notes} />}

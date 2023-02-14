@@ -8,9 +8,6 @@ export default function NotesPage({ notes }: { notes: NoteType[] }) {
   return (
     <div className="container mt-5">
       <div className="d-flex gap-4 justify-content-end w-full">
-        <Link to={"/newfolder"} style={{ alignSelf: "flex-start" }}>
-          <FontAwesomeIcon icon={faFolderPlus} style={{ fontSize: "1.6em" }} />
-        </Link>
         <Link to={"/newfile"}>
           <FontAwesomeIcon icon={faFileMedical} style={{ fontSize: "1.5em" }} />
         </Link>
