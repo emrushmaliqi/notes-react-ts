@@ -8,25 +8,30 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import { Link } from "react-router-dom";
-import { useFolderDelete, useNoteDelete } from "../hooks";
+import { Link, useParams } from "react-router-dom";
+import { useNoteDelete } from "../hooks";
 import { NoteType } from "../Types";
 import NoteCard from "./NoteCard";
 
 interface Props {
-  folder: string | undefined;
-  notes: NoteType[];
+  folders: string[];
+  allNotes: NoteType[];
   setNotes: React.Dispatch<React.SetStateAction<NoteType[]>>;
 }
 
-export default function Folder({ folder, notes, setNotes }: Props) {
+export default function Folder({ folders, allNotes, setNotes }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [activeNote, setActiveNote] = useState<NoteType | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [folder, setFolder] = useState<string>();
+  const params = useParams();
+  const notes = allNotes.filter(n => n.folder == folder);
 
-  function handleClose() {
-    setShowModal(false);
-  }
+  useEffect(() => {
+    setFolder(folders.find(f => params.folder == f));
+  }, [params]);
+
+  const handleClose = () => setShowModal(false);
 
   function handleDelete() {
     if (activeNote) setNotes(useNoteDelete(activeNote.name));
@@ -38,7 +43,7 @@ export default function Folder({ folder, notes, setNotes }: Props) {
     setShowModal(true);
   }
 
-  if (folder === undefined) {
+  if (!folder) {
     return <div>Folder doesn't exist</div>;
   }
 
@@ -57,7 +62,7 @@ export default function Folder({ folder, notes, setNotes }: Props) {
           className="d-flex justify-content-between"
           style={{ height: "120px" }}
         >
-          <h1 className="text-center align-self-start">Folders</h1>
+          <h1 className="text-center align-self-start">{folder}</h1>
           {isEditing ? (
             <FontAwesomeIcon
               icon={faXmark}
@@ -83,7 +88,7 @@ export default function Folder({ folder, notes, setNotes }: Props) {
           )}
         </div>
         <div className="mt-5 d-flex flex-wrap gap-4">
-          {notes.filter(n => n.folder == folder).length == 0 && (
+          {notes.length == 0 && (
             <Link
               className="mx-auto fs-3"
               style={{ marginTop: "12%" }}

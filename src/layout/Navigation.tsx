@@ -7,22 +7,14 @@ import {
 import styles from "../styleModules/navigation.module.css";
 import { Link } from "react-router-dom";
 import Offcanvas from "react-bootstrap/Offcanvas";
-import { useContext, useEffect, useState } from "react";
-import { notesContext } from "../Context/notesContext";
 
 interface Props {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  activeFolder: string | undefined;
   folders: string[];
 }
 
-export default function Navigation({
-  isOpen,
-  setIsOpen,
-  activeFolder,
-  folders,
-}: Props) {
+export default function Navigation({ isOpen, setIsOpen, folders }: Props) {
   return (
     <>
       <FontAwesomeIcon
@@ -86,9 +78,14 @@ export default function Navigation({
               <Link
                 key={folder}
                 to={`folders/${folder}`}
+                onMouseEnter={e => e.currentTarget.classList.add("border-dark")}
+                onMouseLeave={e =>
+                  e.currentTarget.classList.remove("border-dark")
+                }
                 className={`${styles.folders} ${
-                  activeFolder == folder ? "text-black" : "border-primary"
-                }`}
+                  location.pathname.replaceAll("%20", " ").endsWith(folder) &&
+                  "text-black"
+                } border-primary`}
               >
                 {folder}
               </Link>

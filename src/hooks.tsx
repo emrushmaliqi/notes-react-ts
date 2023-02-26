@@ -1,5 +1,10 @@
 import { NoteType } from "./Types";
 
+function setLocal<T>(key: string, value: T): T {
+  localStorage.setItem(key, JSON.stringify(value));
+  return value;
+}
+
 export function useLocalNotes(): NoteType[] {
   const localData = localStorage.getItem("notes");
   if (localData) return JSON.parse(localData);
@@ -12,19 +17,19 @@ export function useLocalFolders(): string[] {
   return [];
 }
 
-export function useNoteDelete(noteName: string) {
-  const prevNotes = useLocalNotes();
-  const notes = prevNotes.filter(note => note.name !== noteName);
-  localStorage.setItem("notes", JSON.stringify(notes));
-  return notes;
-}
+export const useNoteDelete = (me: string) =>
+  setLocal(
+    "notes",
+    useLocalNotes().filter(n => n.name !== me)
+  );
 
-export function useFolderDelete(folder: string) {
-  const prevNotes = useLocalNotes();
-  const prevFolders = useLocalFolders();
-  const notes = prevNotes.filter(note => note.folder != folder);
-  const folders = prevFolders.filter(f => f != folder);
-  localStorage.setItem("notes", JSON.stringify(notes));
-  localStorage.setItem("folders", JSON.stringify(folders));
-  return folders;
+export function useFolderDelete(folder: string): string[] {
+  setLocal(
+    "notes",
+    useLocalNotes().filter(n => n.folder != folder)
+  );
+  return setLocal(
+    "folders",
+    useLocalFolders().filter(f => f != folder)
+  );
 }

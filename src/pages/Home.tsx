@@ -25,49 +25,45 @@ export default function Home({ folders, notes, setFolders, setNotes }: Props) {
   const [noteEditing, setNoteEditing] = useState(false);
   const [folderEditing, setFolderEditing] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [activeNote, setActiveNote] = useState<NoteType | string | null>(null);
+  const [activeElement, setActiveElement] = useState<NoteType | string | null>(
+    null
+  );
   function handleClose() {
     setShowModal(false);
-    setActiveNote(null);
+    setActiveElement(null);
   }
 
   function handleShowModal(note: NoteType | string) {
-    setActiveNote(note);
+    setActiveElement(note);
     setShowModal(true);
   }
   return (
     <>
-      <div className="container mt-5">
-        <div className="d-flex gap-4 justify-content-end w-full">
-          <Link to={"/newfolder"} style={{ alignSelf: "flex-start" }}>
-            <FontAwesomeIcon
-              icon={faFolderPlus}
-              style={{ fontSize: "1.6em" }}
-            />
-          </Link>
-          <Link to={"/newfile"}>
-            <FontAwesomeIcon
-              icon={faFileMedical}
-              style={{ fontSize: "1.5em" }}
-            />
-          </Link>
-        </div>
-
+      <div className="container mt-3">
         <div className="d-flex justify-content-between align-items-center">
           <h2 className="my-5">Folders</h2>
-          {folderEditing ? (
-            <FontAwesomeIcon
-              icon={faXmark}
-              style={{ fontSize: "26px", cursor: "pointer" }}
-              onClick={() => setFolderEditing(false)}
-            />
-          ) : (
-            <FontAwesomeIcon
-              icon={faPencil}
-              style={{ fontSize: "22px", cursor: "pointer" }}
-              onClick={() => setFolderEditing(true)}
-            />
-          )}
+          <div className="d-flex gap-3">
+            <Link to={"/newfolder"} style={{ alignSelf: "flex-start" }}>
+              <FontAwesomeIcon
+                icon={faFolderPlus}
+                style={{ fontSize: "1.6em", color: "black" }}
+              />
+            </Link>
+
+            {folderEditing ? (
+              <FontAwesomeIcon
+                icon={faXmark}
+                style={{ fontSize: "26px", cursor: "pointer" }}
+                onClick={() => setFolderEditing(false)}
+              />
+            ) : (
+              <FontAwesomeIcon
+                icon={faPencil}
+                style={{ fontSize: "22px", cursor: "pointer" }}
+                onClick={() => setFolderEditing(true)}
+              />
+            )}
+          </div>
         </div>
         <div className="d-flex flex-wrap gap-5">
           {folders &&
@@ -101,21 +97,29 @@ export default function Home({ folders, notes, setFolders, setNotes }: Props) {
         </div>
         <div className="d-flex justify-content-between align-items-center">
           <h2 className="my-5">Notes</h2>
-          {noteEditing ? (
-            <FontAwesomeIcon
-              icon={faXmark}
-              style={{ fontSize: "26px", cursor: "pointer" }}
-              onClick={() => setNoteEditing(false)}
-            />
-          ) : (
-            <FontAwesomeIcon
-              icon={faPencil}
-              style={{ fontSize: "22px", cursor: "pointer" }}
-              onClick={() => setNoteEditing(true)}
-            />
-          )}
+          <div className="d-flex gap-3">
+            <Link to={"/newfile"}>
+              <FontAwesomeIcon
+                icon={faFileMedical}
+                style={{ fontSize: "1.5em", color: "black" }}
+              />
+            </Link>
+            {noteEditing ? (
+              <FontAwesomeIcon
+                icon={faXmark}
+                style={{ fontSize: "26px", cursor: "pointer" }}
+                onClick={() => setNoteEditing(false)}
+              />
+            ) : (
+              <FontAwesomeIcon
+                icon={faPencil}
+                style={{ fontSize: "22px", cursor: "pointer" }}
+                onClick={() => setNoteEditing(true)}
+              />
+            )}
+          </div>
         </div>
-        <div className="mt-5 d-flex flex-wrap gap-4">
+        <div className="d-flex flex-wrap gap-4 my-4">
           {notes &&
             notes
               .filter(note => note.folder === undefined)
@@ -145,9 +149,9 @@ export default function Home({ folders, notes, setFolders, setNotes }: Props) {
         <Modal.Header closeButton>
           <Modal.Title>
             Delete{" "}
-            {typeof activeNote == "string"
-              ? `Folder ${activeNote}`
-              : `Note ${activeNote?.name}`}
+            {typeof activeElement == "string"
+              ? `Folder ${activeElement}`
+              : `Note ${activeElement?.name}`}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>Press Save Changes to delete Note</Modal.Body>
@@ -158,12 +162,12 @@ export default function Home({ folders, notes, setFolders, setNotes }: Props) {
           <Button
             variant="primary"
             onClick={() => {
-              if (activeNote) {
-                if (typeof activeNote == "string") {
-                  setFolders(useFolderDelete(activeNote));
+              if (activeElement) {
+                if (typeof activeElement == "string") {
+                  setFolders(useFolderDelete(activeElement));
                   setNotes(useLocalNotes());
                 } else {
-                  setNotes(useNoteDelete(activeNote.name));
+                  setNotes(useNoteDelete(activeElement.name));
                 }
               }
               handleClose();

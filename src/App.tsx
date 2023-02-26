@@ -1,25 +1,21 @@
 import { Route, Routes, useLocation } from "react-router";
 import { Suspense, lazy, useState, useEffect } from "react";
-import Navigation from "./layout/Navigation";
-import NotFoundPage from "./pages/NotFoundPage";
-import NotesPage from "./pages/NotesPage";
 import { NoteType } from "./Types";
-import CreateFile from "./components/CreateFile";
+import Navigation from "./layout/Navigation";
 
 const Home = lazy(() => import("./pages/Home"));
+const NotesPage = lazy(() => import("./pages/NotesPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const Note = lazy(() => import("./components/Note"));
 const Folder = lazy(() => import("./components/Folder"));
 const CreateFolder = lazy(() => import("./components/CreateFolder"));
+const CreateNote = lazy(() => import("./components/CreateNote"));
 
 function App() {
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const location = useLocation();
   const [notes, setNotes] = useState<NoteType[]>([]);
   const [folders, setFolders] = useState<string[]>([]);
-
-  const [activeFolder, setActiveFolder] = useState<string | undefined>(
-    undefined
-  );
 
   useEffect(() => {
     const localFolders = localStorage.getItem("folders");
@@ -28,23 +24,13 @@ function App() {
     if (localNotes) setNotes(JSON.parse(localNotes));
   }, []);
 
-  useEffect(() => {
-    setIsNavOpen(false);
-    if (location.pathname.startsWith("/folders/")) {
-      const folderName = location.pathname
-        .replace("/folders/", "")
-        .replaceAll("%20", " ");
-      setActiveFolder(folders.find(folder => folder == folderName));
-    } else {
-      setActiveFolder(undefined);
-    }
-  }, [location]);
+  useEffect(() => setIsNavOpen(false), [location]);
+
   return (
     <>
       <Navigation
         isOpen={isNavOpen}
         setIsOpen={setIsNavOpen}
-        activeFolder={activeFolder}
         folders={folders}
       />
       <Suspense fallback={<h1 style={{ marginLeft: "400px" }}>Loading...</h1>}>
@@ -63,11 +49,7 @@ function App() {
           <Route
             path="/folders/:folder"
             element={
-              <Folder
-                folder={activeFolder}
-                setNotes={setNotes}
-                notes={notes.filter(note => note.folder == activeFolder)}
-              />
+              <Folder folders={folders} setNotes={setNotes} allNotes={notes} />
             }
           />
           <Route
@@ -75,8 +57,8 @@ function App() {
             element={<CreateFolder folders={folders} setFolders={setFolders} />}
           />
           <Route
-            path="/newfile"
-            element={<CreateFile setNotes={setNotes} notes={notes} />}
+            path="/newnote"
+            element={<CreateNote setNotes={setNotes} notes={notes} />}
           />
           <Route
             path="/note/:note"

@@ -8,10 +8,13 @@ interface Props {
   setFolders: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-type Errors = "Folder Name required!" | "Folder already exists!" | null;
+enum Error {
+  empty = "Folder Name required!",
+  exists = "Folder already exists!",
+}
 
 export default function CreateFolder({ folders, setFolders }: Props) {
-  const [isWrong, setIsWrong] = useState<Errors>(null);
+  const [isWrong, setIsWrong] = useState<Error | null>(null);
   const folderRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   function handleCreate(e: React.SyntheticEvent): void {
@@ -20,13 +23,13 @@ export default function CreateFolder({ folders, setFolders }: Props) {
       const value = folderRef.current.value;
       if (value.trim()) {
         if (folders.includes(value)) {
-          return setIsWrong("Folder already exists!");
+          return setIsWrong(Error.exists);
         }
         localStorage.setItem("folders", JSON.stringify([value, ...folders]));
         setFolders(useLocalFolders());
         return navigate(`/folders/${value}`, { replace: true });
       }
-      setIsWrong("Folder Name required!");
+      setIsWrong(Error.empty);
     }
   }
   return (

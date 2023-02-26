@@ -1,9 +1,10 @@
 import { faPencil } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
+import MDEditor from "@uiw/react-md-editor";
+import { useState } from "react";
 import { useParams } from "react-router";
 import { NoteType } from "../Types";
-import CreateFile from "./CreateFile";
+import CreateFile from "./CreateNote";
 
 export default function Note({
   notes,
@@ -47,7 +48,14 @@ export default function Note({
             style={{ cursor: "pointer" }}
           />
         </div>
-        <p>{note.content}</p>
+        <MDEditor
+          visibleDragbar={false}
+          hideToolbar={true}
+          preview="preview"
+          height={700}
+          data-color-mode="light"
+          value={note.content}
+        />
       </div>
     );
   }
