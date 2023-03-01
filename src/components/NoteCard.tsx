@@ -9,7 +9,7 @@ interface Props {
 
 export default function NoteCard({ note }: Props) {
   return (
-    <Link to={`/note/${note.name}`} className="noteCard">
+    <Link to={`/note/${note._id}`} className="noteCard">
       <Card
         style={{
           width: "15rem",
@@ -18,7 +18,7 @@ export default function NoteCard({ note }: Props) {
         }}
       >
         <Card.Body>
-          <Card.Title>{note.name}</Card.Title>
+          <Card.Title>{note.title}</Card.Title>
         </Card.Body>
         <Card.Text>
           <MDEditor

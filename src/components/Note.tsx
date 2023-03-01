@@ -1,33 +1,29 @@
 import { faPencil } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MDEditor from "@uiw/react-md-editor";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
+import { useNotesContext, useSetNotes } from "../hooks/noteHooks";
 import { NoteType } from "../Types";
-import CreateFile from "./CreateNote";
+import CreateNote from "./CreateNote";
 
-export default function Note({
-  notes,
-  setNotes,
-}: {
-  notes: NoteType[];
-  setNotes: React.Dispatch<React.SetStateAction<NoteType[]>>;
-}) {
+export default function Note() {
+  const { notes, dispatch } = useNotesContext();
   const [isEditing, setIsEditing] = useState(false);
   const params = useParams();
-  const [note, setNote] = useState(
-    notes.find(note => note.name == params.note)
-  );
+  const note = notes.find(n => n._id === params.note);
+
+  useEffect(() => {
+    if (notes.length === 0) {
+      useSetNotes(dispatch, params.note);
+    }
+    console.log(notes);
+  }, [dispatch]);
 
   if (note) {
     if (isEditing)
       return (
-        <CreateFile
-          setNotes={setNotes}
-          note={note}
-          setIsEditing={state => setIsEditing(state)}
-          setNote={state => setNote(state)}
-        />
+        <CreateNote note={note} setIsEditing={state => setIsEditing(state)} />
       );
 
     return (
@@ -41,7 +37,7 @@ export default function Note({
             marginBottom: "0.5em",
           }}
         >
-          <h2>{note.name}</h2>
+          <h2>{note.title}</h2>
           <FontAwesomeIcon
             onClick={() => setIsEditing(true)}
             icon={faPencil}

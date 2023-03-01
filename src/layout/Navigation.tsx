@@ -55,7 +55,7 @@ export default function Navigation({ isOpen, setIsOpen, folders }: Props) {
                 style={{ fontSize: "1.6em" }}
               />
             </Link>
-            <Link to={"/newfile"}>
+            <Link to={"/newnote"}>
               <FontAwesomeIcon
                 icon={faFileMedical}
                 style={{ fontSize: "1.5em" }}

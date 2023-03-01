@@ -1,4 +1,4 @@
-import { NoteType } from "./Types";
+import { NoteType } from "../Types";
 
 function setLocal<T>(key: string, value: T): T {
   localStorage.setItem(key, JSON.stringify(value));

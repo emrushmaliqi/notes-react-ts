@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import Button from "react-bootstrap/Button";
 import { useNavigate } from "react-router";
-import { useLocalFolders } from "../hooks";
+import { useLocalFolders } from "../hooks/UseLocal";
 
 interface Props {
   folders: string[];

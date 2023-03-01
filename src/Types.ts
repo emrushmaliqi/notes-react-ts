@@ -1,5 +1,21 @@
 export interface NoteType {
-  name: string;
+  _id?: string;
+  title: string;
   content: string;
-  folder?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  folder?: FolderType["_id"];
+}
+
+export interface FolderType {
+  _id: string;
+  name: string;
+  notes: string[];
+  createdAt?: string;
+  updatedAt: string;
+}
+
+export interface ResponseProps<T> {
+  status: number;
+  data: T;
 }

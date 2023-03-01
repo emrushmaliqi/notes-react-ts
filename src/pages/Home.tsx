@@ -6,34 +6,48 @@ import {
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import FolderCard from "../components/FolderCard";
 import NoteCard from "../components/NoteCard";
-import { useFolderDelete, useLocalNotes, useNoteDelete } from "../hooks";
-import { NoteType } from "../Types";
+import {
+  useFolderDelete,
+  useLocalNotes,
+  useNoteDelete,
+} from "../hooks/UseLocal";
+import {
+  useDeleteNote,
+  useNotesContext,
+  useSetNotes,
+} from "../hooks/noteHooks";
+import { FolderType, NoteType } from "../Types";
+import axios from "axios";
+import { NotesActionKind } from "../context/NotesContext";
+import { useFoldersContext, useSetFolders } from "../hooks/folderHooks";
 
-interface Props {
-  folders: string[];
-  notes: NoteType[];
-  setNotes: (notes: NoteType[]) => void;
-  setFolders: (folders: string[]) => void;
-}
-
-export default function Home({ folders, notes, setFolders, setNotes }: Props) {
+export default function Home() {
   const [noteEditing, setNoteEditing] = useState(false);
   const [folderEditing, setFolderEditing] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [activeElement, setActiveElement] = useState<NoteType | string | null>(
-    null
-  );
+  const [activeElement, setActiveElement] = useState<
+    NoteType | FolderType | null
+  >(null);
+
+  const { folders, dispatch: foldersDispatch } = useFoldersContext();
+  const { notes, dispatch: notesDispatch } = useNotesContext();
+
+  useEffect(() => {
+    useSetNotes(notesDispatch);
+    useSetFolders(foldersDispatch);
+  }, [notesDispatch, foldersDispatch]);
+
   function handleClose() {
     setShowModal(false);
     setActiveElement(null);
   }
 
-  function handleShowModal(note: NoteType | string) {
+  function handleShowModal(note: NoteType | FolderType) {
     setActiveElement(note);
     setShowModal(true);
   }
@@ -68,14 +82,8 @@ export default function Home({ folders, notes, setFolders, setNotes }: Props) {
         <div className="d-flex flex-wrap gap-5">
           {folders &&
             folders.map(folder => (
-              <div className="position-relative" key={folder}>
-                <FolderCard
-                  key={folder}
-                  folder={folder}
-                  notesCount={
-                    notes.filter(note => note.folder === folder).length
-                  }
-                />
+              <div className="position-relative" key={folder._id}>
+                <FolderCard folder={folder} />
                 {folderEditing && (
                   <FontAwesomeIcon
                     icon={faXmarkCircle}
@@ -98,7 +106,7 @@ export default function Home({ folders, notes, setFolders, setNotes }: Props) {
         <div className="d-flex justify-content-between align-items-center">
           <h2 className="my-5">Notes</h2>
           <div className="d-flex gap-3">
-            <Link to={"/newfile"}>
+            <Link to={"/newnote"}>
               <FontAwesomeIcon
                 icon={faFileMedical}
                 style={{ fontSize: "1.5em", color: "black" }}
@@ -121,28 +129,26 @@ export default function Home({ folders, notes, setFolders, setNotes }: Props) {
         </div>
         <div className="d-flex flex-wrap gap-4 my-4">
           {notes &&
-            notes
-              .filter(note => note.folder === undefined)
-              .map(note => (
-                <div key={note.name} className="position-relative">
-                  {noteEditing && (
-                    <FontAwesomeIcon
-                      icon={faXmarkCircle}
-                      onClick={() => handleShowModal(note)}
-                      style={{
-                        fontSize: "22px",
-                        position: "absolute",
-                        backgroundColor: "white",
-                        right: -11,
-                        top: -11,
-                        zIndex: 1,
-                        cursor: "pointer",
-                      }}
-                    />
-                  )}
-                  <NoteCard key={note.name} note={note} />
-                </div>
-              ))}
+            notes.map(note => (
+              <div key={note._id} className="position-relative">
+                {noteEditing && (
+                  <FontAwesomeIcon
+                    icon={faXmarkCircle}
+                    onClick={() => handleShowModal(note)}
+                    style={{
+                      fontSize: "22px",
+                      position: "absolute",
+                      backgroundColor: "white",
+                      right: -11,
+                      top: -11,
+                      zIndex: 1,
+                      cursor: "pointer",
+                    }}
+                  />
+                )}
+                <NoteCard key={note._id} note={note} />
+              </div>
+            ))}
         </div>
       </div>
       <Modal show={showModal} onHide={handleClose}>
@@ -151,7 +157,7 @@ export default function Home({ folders, notes, setFolders, setNotes }: Props) {
             Delete{" "}
             {typeof activeElement == "string"
               ? `Folder ${activeElement}`
-              : `Note ${activeElement?.name}`}
+              : `Note ${activeElement?.title}`}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>Press Save Changes to delete Note</Modal.Body>
@@ -165,9 +171,9 @@ export default function Home({ folders, notes, setFolders, setNotes }: Props) {
               if (activeElement) {
                 if (typeof activeElement == "string") {
                   setFolders(useFolderDelete(activeElement));
-                  setNotes(useLocalNotes());
+                  // setNotes(useLocalNotes());
                 } else {
-                  setNotes(useNoteDelete(activeElement.name));
+                  useDeleteNote(notesDispatch, activeElement._id);
                 }
               }
               handleClose();

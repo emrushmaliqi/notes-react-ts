@@ -9,14 +9,12 @@ import { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { Link, useParams } from "react-router-dom";
-import { useNoteDelete } from "../hooks";
+import { useNoteDelete } from "../hooks/UseLocal";
 import { NoteType } from "../Types";
 import NoteCard from "./NoteCard";
 
 interface Props {
   folders: string[];
-  allNotes: NoteType[];
-  setNotes: React.Dispatch<React.SetStateAction<NoteType[]>>;
 }
 
 export default function Folder({ folders, allNotes, setNotes }: Props) {
@@ -51,7 +49,7 @@ export default function Folder({ folders, allNotes, setNotes }: Props) {
     <>
       <div className="container mt-3">
         <div className="d-flex gap-4 justify-content-end w-full">
-          <Link to={"/newfile"} state={{ folder: folder }}>
+          <Link to={"/newnote"} state={{ folder: folder }}>
             <FontAwesomeIcon
               icon={faFileMedical}
               style={{ fontSize: "1.5em", marginBottom: "-40px" }}
@@ -92,7 +90,7 @@ export default function Folder({ folders, allNotes, setNotes }: Props) {
             <Link
               className="mx-auto fs-3"
               style={{ marginTop: "12%" }}
-              to="/newfile"
+              to="/newnote"
               state={{ folder: folder }}
             >
               Add new file
