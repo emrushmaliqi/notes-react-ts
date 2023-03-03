@@ -18,14 +18,15 @@ export const useFoldersContext = () => {
 
 export const useSetFolders = async (
   dispatch: React.Dispatch<FoldersAction> | null,
-  folder: FolderType["_id"] = ""
+  folder: boolean = false
 ) => {
-  const { status, data }: ResponseProps<FolderType[] | FolderType> =
-    await axios.get(`./api/folders/${folder}`);
+  const { status, data }: ResponseProps<FolderType[]> = await axios.get(
+    `${folder ? "." : ""}./api/folders/`
+  );
   if (status === 200 && dispatch) {
     dispatch({
       type: FoldersActionKind.SET,
-      payload: Array.isArray(data) ? data : [data],
+      payload: data,
     });
   }
 };
@@ -49,7 +50,7 @@ export const useUpdateFolder = async (
   { _id, notes }: Pick<FolderType, "_id" | "notes">
 ) => {
   const { status, data }: ResponseProps<FolderType> = await axios.patch(
-    `../api/notes/${_id}`,
+    `../api/folders/${_id}`,
     {
       notes,
     }

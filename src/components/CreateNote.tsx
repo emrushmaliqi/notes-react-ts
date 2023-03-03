@@ -29,7 +29,7 @@ export default function CreateNote({ note, setIsEditing }: Props) {
     }
   }, []);
 
-  function addFile() {
+  const addFile = async () => {
     if (titleRef.current) {
       const titleValue = titleRef.current.value;
       // if (titleValue.trim()) {
@@ -39,13 +39,14 @@ export default function CreateNote({ note, setIsEditing }: Props) {
       };
       if (location.state?.folder) {
         inputNote.folder = location.state.folder;
+        await useCreateNote(dispatch, inputNote);
         navigate(`/folders/${location.state.folder}`, { replace: true });
       } else {
+        await useCreateNote(dispatch, inputNote);
         navigate("/", { replace: true });
       }
-      useCreateNote(dispatch, inputNote);
     }
-  }
+  };
 
   const editFile = async () => {
     if (note && setIsEditing && titleRef.current) {
@@ -67,44 +68,27 @@ export default function CreateNote({ note, setIsEditing }: Props) {
   }, []);
 
   function handleSave(): void {
-    if (!note) return addFile();
-    editFile();
+    if (!note) addFile();
+    else editFile();
   }
 
   return (
     <div className="container">
       <form className="d-flex flex-column">
-        {/* {note ? (
-          <h2
-            style={{
-              width: "100%",
-              outline: "none",
-              border: "none",
-              borderBottom: "2px solid black",
-              lineHeight: "1.2",
-              padding: "0.5em 0",
-            }}
-          >
-            {note.title}
-          </h2>
-        ) : ( */}
-        <>
-          <input
-            ref={titleRef}
-            type="text"
-            placeholder="Title"
-            style={{
-              width: "100%",
-              outline: "none",
-              border: "none",
-              borderBottom: "2px solid black",
-              lineHeight: "1.2",
-              padding: "1em 0",
-              fontSize: "22px",
-            }}
-          />
-        </>
-
+        <input
+          ref={titleRef}
+          type="text"
+          placeholder="Title"
+          style={{
+            width: "100%",
+            outline: "none",
+            border: "none",
+            borderBottom: "2px solid black",
+            lineHeight: "1.2",
+            padding: "1em 0",
+            fontSize: "22px",
+          }}
+        />
         <MDEditor
           height={600}
           data-color-mode="light"

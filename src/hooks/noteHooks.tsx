@@ -1,11 +1,12 @@
 import axios from "axios";
-import { NoteType, ResponseProps } from "../Types";
+import { FolderType, NoteType, ResponseProps } from "../Types";
 import {
   NotesAction,
   NotesActionKind,
   NotesContext,
 } from "../context/NotesContext";
 import { useContext } from "react";
+import { useLocation } from "react-router";
 
 export const useNotesContext = () => {
   const context = useContext(NotesContext);
@@ -22,7 +23,7 @@ export const useSetNotes = async (
   // if it is set to true it will get all notes including folder Notes,
   // if it is set to a string (note._id) it will get one Note
   note: boolean | NoteType["_id"] = false
-) => {
+): Promise<boolean> => {
   const url = () => {
     if (note === true) return "api/notes/withFolderNotes";
     if (typeof note === "string") return `../api/notes/${note}`;
@@ -35,7 +36,9 @@ export const useSetNotes = async (
       type: NotesActionKind.SET,
       payload: Array.isArray(data) ? data : [data],
     });
+    return false;
   }
+  return true;
 };
 
 export const useCreateNote = async (
@@ -43,7 +46,7 @@ export const useCreateNote = async (
   note: NoteType
 ) => {
   const { status, data }: ResponseProps<NoteType> = await axios.post(
-    "api/notes",
+    `${location.pathname !== "/" ? "../" : ""}api/notes`,
     note
   );
 
@@ -77,13 +80,29 @@ export const useDeleteNote = async (
   noteId: NoteType["_id"]
 ) => {
   const { status, data }: ResponseProps<NoteType> = await axios.delete(
-    `api/notes/${noteId}`
+    `${noteId ? "../" : ""}api/notes/${noteId}`
   );
 
-  if (status == 202 && dispatch) {
+  if (status === 202 && dispatch) {
     dispatch({
       type: NotesActionKind.DELETE,
       payload: [data],
     });
   }
+};
+
+export const useSetFolderNotes = async (
+  dispatch: React.Dispatch<NotesAction> | null,
+  folderId: FolderType["_id"] | undefined
+): Promise<boolean> => {
+  if (folderId === undefined) return true;
+  const { status, data }: ResponseProps<NoteType[]> = await axios.get(
+    `../api/notes/folder/${folderId}`
+  );
+
+  if (status === 200 && dispatch) {
+    dispatch({ type: NotesActionKind.SET, payload: data });
+    return false;
+  }
+  return true;
 };

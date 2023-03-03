@@ -7,14 +7,21 @@ import {
 import styles from "../styleModules/navigation.module.css";
 import { Link } from "react-router-dom";
 import Offcanvas from "react-bootstrap/Offcanvas";
+import { useFoldersContext, useSetFolders } from "../hooks/folderHooks";
+import { useEffect, useState } from "react";
 
 interface Props {
   isOpen: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  folders: string[];
+  setIsOpen: (state: boolean) => void;
 }
 
-export default function Navigation({ isOpen, setIsOpen, folders }: Props) {
+export default function Navigation({ isOpen, setIsOpen }: Props) {
+  const { folders, dispatch } = useFoldersContext();
+
+  useEffect(() => {
+    if (folders.length === 0) useSetFolders(dispatch);
+  }, []);
+
   return (
     <>
       <FontAwesomeIcon
@@ -74,22 +81,26 @@ export default function Navigation({ isOpen, setIsOpen, folders }: Props) {
             All Folders
           </Link>
           {folders &&
-            folders.map(folder => (
-              <Link
-                key={folder}
-                to={`folders/${folder}`}
-                onMouseEnter={e => e.currentTarget.classList.add("border-dark")}
-                onMouseLeave={e =>
-                  e.currentTarget.classList.remove("border-dark")
-                }
-                className={`${styles.folders} ${
-                  location.pathname.replaceAll("%20", " ").endsWith(folder) &&
-                  "text-black"
-                } border-primary`}
-              >
-                {folder}
-              </Link>
-            ))}
+            folders.map(
+              folder =>
+                folder._id && (
+                  <Link
+                    key={folder._id}
+                    to={`folders/${folder._id}`}
+                    onMouseEnter={e =>
+                      e.currentTarget.classList.add("border-dark")
+                    }
+                    onMouseLeave={e =>
+                      e.currentTarget.classList.remove("border-dark")
+                    }
+                    className={`${styles.folders} ${
+                      location.pathname.endsWith(folder._id) && "text-black"
+                    } border-primary`}
+                  >
+                    {folder.name}
+                  </Link>
+                )
+            )}
         </Offcanvas.Body>
       </Offcanvas>
     </>

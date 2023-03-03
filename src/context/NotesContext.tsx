@@ -6,6 +6,7 @@ export enum NotesActionKind {
   CREATE = "CREATE",
   DELETE = "DELETE",
   UPDATE = "UPDATE",
+  SETFOLDERNOTES = "SETFOLDERNOTES",
 }
 
 export interface NotesAction {

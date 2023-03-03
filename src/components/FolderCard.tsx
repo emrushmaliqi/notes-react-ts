@@ -10,7 +10,7 @@ interface Props {
 export default function FolderCard({ folder }: Props) {
   return (
     <Link
-      to={`/folders/${folder}`}
+      to={`/folders/${folder._id}`}
       className="d-flex flex-column position-relative"
       style={{
         width: "max-content",

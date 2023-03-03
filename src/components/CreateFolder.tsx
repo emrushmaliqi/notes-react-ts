@@ -1,35 +1,27 @@
 import { useRef, useState } from "react";
 import Button from "react-bootstrap/Button";
 import { useNavigate } from "react-router";
-import { useLocalFolders } from "../hooks/UseLocal";
+import {
+  useCreateFolder,
+  useFoldersContext,
+  useSetFolders,
+} from "../hooks/folderHooks";
 
-interface Props {
-  folders: string[];
-  setFolders: React.Dispatch<React.SetStateAction<string[]>>;
-}
-
-enum Error {
-  empty = "Folder Name required!",
-  exists = "Folder already exists!",
-}
-
-export default function CreateFolder({ folders, setFolders }: Props) {
-  const [isWrong, setIsWrong] = useState<Error | null>(null);
+export default function CreateFolder() {
+  const [isWrong, setIsWrong] = useState<boolean>(false);
   const folderRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { dispatch } = useFoldersContext();
+
   function handleCreate(e: React.SyntheticEvent): void {
     e.preventDefault();
     if (folderRef.current) {
-      const value = folderRef.current.value;
-      if (value.trim()) {
-        if (folders.includes(value)) {
-          return setIsWrong(Error.exists);
-        }
-        localStorage.setItem("folders", JSON.stringify([value, ...folders]));
-        setFolders(useLocalFolders());
-        return navigate(`/folders/${value}`, { replace: true });
-      }
-      setIsWrong(Error.empty);
+      const name = folderRef.current.value;
+      if (name.trim())
+        useCreateFolder(dispatch, { name, notes: [] }).then(() =>
+          navigate("/", { replace: true })
+        );
+      else setIsWrong(true);
     }
   }
   return (
@@ -46,7 +38,7 @@ export default function CreateFolder({ folders, setFolders }: Props) {
           className="p-2"
           style={{ width: "80%", fontSize: 22 }}
         />
-        {isWrong && isWrong}
+        {isWrong && <h5>Name is required!</h5>}
         <Button onClick={handleCreate} style={{ width: "50%", height: 50 }}>
           Create
         </Button>

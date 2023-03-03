@@ -32,7 +32,8 @@ export const foldersReducer = (
     case FoldersActionKind.SET:
       return { folders: payload };
     case FoldersActionKind.CREATE:
-      return { folders: [...state.folders, ...payload] };
+      console.log(payload);
+      return { folders: [...payload, ...state.folders] };
     case FoldersActionKind.UPDATE:
       const [updatedFolder] = payload;
       return {

@@ -12,45 +12,34 @@ import { Link } from "react-router-dom";
 import FolderCard from "../components/FolderCard";
 import NoteCard from "../components/NoteCard";
 import {
-  useFolderDelete,
-  useLocalNotes,
-  useNoteDelete,
-} from "../hooks/UseLocal";
-import {
   useDeleteNote,
   useNotesContext,
   useSetNotes,
 } from "../hooks/noteHooks";
 import { FolderType, NoteType } from "../Types";
-import axios from "axios";
-import { NotesActionKind } from "../context/NotesContext";
-import { useFoldersContext, useSetFolders } from "../hooks/folderHooks";
+import { useDeleteFolder, useFoldersContext } from "../hooks/folderHooks";
+import SpinnerElement from "../components/SpinnerElement";
 
 export default function Home() {
   const [noteEditing, setNoteEditing] = useState(false);
   const [folderEditing, setFolderEditing] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [activeElement, setActiveElement] = useState<
-    NoteType | FolderType | null
-  >(null);
-
+  const [activeNote, setActiveNote] = useState<NoteType | undefined>();
+  const [activeFolder, setActiveFolder] = useState<FolderType | undefined>();
+  const [isLoading, setIsLoading] = useState(true);
   const { folders, dispatch: foldersDispatch } = useFoldersContext();
   const { notes, dispatch: notesDispatch } = useNotesContext();
 
   useEffect(() => {
-    useSetNotes(notesDispatch);
-    useSetFolders(foldersDispatch);
-  }, [notesDispatch, foldersDispatch]);
+    useSetNotes(notesDispatch).then(res => setIsLoading(res));
+  }, [notesDispatch]);
 
   function handleClose() {
     setShowModal(false);
-    setActiveElement(null);
+    if (activeNote) return setActiveNote(undefined);
+    setActiveFolder(undefined);
   }
 
-  function handleShowModal(note: NoteType | FolderType) {
-    setActiveElement(note);
-    setShowModal(true);
-  }
   return (
     <>
       <div className="container mt-3">
@@ -87,7 +76,10 @@ export default function Home() {
                 {folderEditing && (
                   <FontAwesomeIcon
                     icon={faXmarkCircle}
-                    onClick={() => handleShowModal(folder)}
+                    onClick={() => {
+                      setActiveFolder(folder);
+                      setShowModal(true);
+                    }}
                     style={{
                       fontSize: "22px",
                       position: "absolute",
@@ -105,36 +97,44 @@ export default function Home() {
         </div>
         <div className="d-flex justify-content-between align-items-center">
           <h2 className="my-5">Notes</h2>
-          <div className="d-flex gap-3">
-            <Link to={"/newnote"}>
-              <FontAwesomeIcon
-                icon={faFileMedical}
-                style={{ fontSize: "1.5em", color: "black" }}
-              />
-            </Link>
-            {noteEditing ? (
-              <FontAwesomeIcon
-                icon={faXmark}
-                style={{ fontSize: "26px", cursor: "pointer" }}
-                onClick={() => setNoteEditing(false)}
-              />
-            ) : (
-              <FontAwesomeIcon
-                icon={faPencil}
-                style={{ fontSize: "22px", cursor: "pointer" }}
-                onClick={() => setNoteEditing(true)}
-              />
-            )}
-          </div>
+          {!isLoading && (
+            <div className="d-flex gap-3">
+              <Link to={"/newnote"}>
+                <FontAwesomeIcon
+                  icon={faFileMedical}
+                  style={{ fontSize: "1.5em", color: "black" }}
+                />
+              </Link>
+              {noteEditing ? (
+                <FontAwesomeIcon
+                  icon={faXmark}
+                  style={{ fontSize: "26px", cursor: "pointer" }}
+                  onClick={() => setNoteEditing(false)}
+                />
+              ) : (
+                <FontAwesomeIcon
+                  icon={faPencil}
+                  style={{ fontSize: "22px", cursor: "pointer" }}
+                  onClick={() => setNoteEditing(true)}
+                />
+              )}
+            </div>
+          )}
         </div>
         <div className="d-flex flex-wrap gap-4 my-4">
-          {notes &&
+          {isLoading ? (
+            <SpinnerElement />
+          ) : (
+            notes &&
             notes.map(note => (
               <div key={note._id} className="position-relative">
                 {noteEditing && (
                   <FontAwesomeIcon
                     icon={faXmarkCircle}
-                    onClick={() => handleShowModal(note)}
+                    onClick={() => {
+                      setActiveNote(note);
+                      setShowModal(true);
+                    }}
                     style={{
                       fontSize: "22px",
                       position: "absolute",
@@ -148,16 +148,17 @@ export default function Home() {
                 )}
                 <NoteCard key={note._id} note={note} />
               </div>
-            ))}
+            ))
+          )}
         </div>
       </div>
       <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
             Delete{" "}
-            {typeof activeElement == "string"
-              ? `Folder ${activeElement}`
-              : `Note ${activeElement?.title}`}
+            {activeFolder
+              ? `Folder ${activeFolder.name}`
+              : `Note ${activeNote?.title}`}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>Press Save Changes to delete Note</Modal.Body>
@@ -168,13 +169,10 @@ export default function Home() {
           <Button
             variant="primary"
             onClick={() => {
-              if (activeElement) {
-                if (typeof activeElement == "string") {
-                  setFolders(useFolderDelete(activeElement));
-                  // setNotes(useLocalNotes());
-                } else {
-                  useDeleteNote(notesDispatch, activeElement._id);
-                }
+              if (activeFolder) {
+                useDeleteFolder(foldersDispatch, activeFolder._id);
+              } else if (activeNote) {
+                useDeleteNote(notesDispatch, activeNote._id);
               }
               handleClose();
             }}

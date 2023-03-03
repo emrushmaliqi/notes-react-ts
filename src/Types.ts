@@ -8,11 +8,11 @@ export interface NoteType {
 }
 
 export interface FolderType {
-  _id: string;
+  _id?: string;
   name: string;
   notes: string[];
   createdAt?: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export interface ResponseProps<T> {
