@@ -8,15 +8,15 @@ import { BrowserRouter } from "react-router-dom";
 import { NotesContextProvider } from "./context/NotesContext";
 import "./index.css";
 import { FoldersContextProvider } from "./context/FoldersContext";
+import { AuthContextProvider } from "./context/AuthContext";
+import { ContextsProvider } from "./context/ContextsProvider";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
-      <FoldersContextProvider>
-        <NotesContextProvider>
-          <App />
-        </NotesContextProvider>
-      </FoldersContextProvider>
+      <ContextsProvider>
+        <App />
+      </ContextsProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

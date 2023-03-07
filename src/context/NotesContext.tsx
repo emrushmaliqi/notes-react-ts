@@ -1,4 +1,4 @@
-import { createContext, useReducer } from "react";
+import { createContext, Dispatch, ReactNode, Reducer, useReducer } from "react";
 import { NoteType } from "../Types";
 
 export enum NotesActionKind {
@@ -11,7 +11,7 @@ export enum NotesActionKind {
 
 export interface NotesAction {
   type: NotesActionKind;
-  payload: NoteType[];
+  payload: NoteState["notes"];
 }
 
 interface NoteState {
@@ -19,15 +19,14 @@ interface NoteState {
 }
 
 export const NotesContext = createContext<{
-  notes: NoteType[];
-  dispatch: React.Dispatch<NotesAction> | null;
+  notes: NoteState["notes"];
+  dispatch: Dispatch<NotesAction> | null;
 }>({ notes: [], dispatch: null });
 
-export const notesReducer = (
+export const notesReducer: Reducer<NoteState, NotesAction> = (
   state: NoteState,
-  action: NotesAction
-): NoteState => {
-  const { type, payload } = action;
+  { type, payload }: NotesAction
+) => {
   switch (type) {
     case NotesActionKind.SET:
       return { notes: payload };
@@ -50,11 +49,7 @@ export const notesReducer = (
   }
 };
 
-export const NotesContextProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(notesReducer, { notes: [] });
   return (
     <NotesContext.Provider value={{ ...state, dispatch }}>

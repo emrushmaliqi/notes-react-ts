@@ -1,4 +1,4 @@
-import { createContext, useReducer } from "react";
+import { createContext, Dispatch, ReactNode, Reducer, useReducer } from "react";
 import { FolderType } from "../Types";
 
 export enum FoldersActionKind {
@@ -10,7 +10,7 @@ export enum FoldersActionKind {
 
 export interface FoldersAction {
   type: FoldersActionKind;
-  payload: FolderType[];
+  payload: FolderState["folders"];
 }
 
 interface FolderState {
@@ -18,21 +18,18 @@ interface FolderState {
 }
 
 export const FoldersContext = createContext<{
-  folders: FolderType[];
-  dispatch: React.Dispatch<FoldersAction> | null;
+  folders: FolderState["folders"];
+  dispatch: Dispatch<FoldersAction> | null;
 }>({ folders: [], dispatch: null });
 
-export const foldersReducer = (
+export const foldersReducer: Reducer<FolderState, FoldersAction> = (
   state: FolderState,
-  action: FoldersAction
-): FolderState => {
-  const { type, payload } = action;
-
+  { type, payload }: FoldersAction
+) => {
   switch (type) {
     case FoldersActionKind.SET:
       return { folders: payload };
     case FoldersActionKind.CREATE:
-      console.log(payload);
       return { folders: [...payload, ...state.folders] };
     case FoldersActionKind.UPDATE:
       const [updatedFolder] = payload;
@@ -54,7 +51,7 @@ export const foldersReducer = (
 export const FoldersContextProvider = ({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) => {
   const [state, dispatch] = useReducer(foldersReducer, { folders: [] });
   return (

@@ -1,27 +1,22 @@
-import { useRef, useState } from "react";
+import { useRef, useState, SyntheticEvent } from "react";
 import Button from "react-bootstrap/Button";
 import { useNavigate } from "react-router";
-import {
-  useCreateFolder,
-  useFoldersContext,
-  useSetFolders,
-} from "../hooks/folderHooks";
+import { useCreateFolder } from "../hooks/folderHooks";
 
 export default function CreateFolder() {
   const [isWrong, setIsWrong] = useState<boolean>(false);
   const folderRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-  const { dispatch } = useFoldersContext();
+  const { isLoading, createFolder } = useCreateFolder();
 
-  function handleCreate(e: React.SyntheticEvent): void {
+  async function handleCreate(e: SyntheticEvent) {
     e.preventDefault();
     if (folderRef.current) {
       const name = folderRef.current.value;
-      if (name.trim())
-        useCreateFolder(dispatch, { name, notes: [] }).then(() =>
-          navigate("/", { replace: true })
-        );
-      else setIsWrong(true);
+      if (name.trim()) {
+        await createFolder({ name, notes: [] });
+        navigate("/", { replace: true });
+      } else setIsWrong(true);
     }
   }
   return (
@@ -39,7 +34,11 @@ export default function CreateFolder() {
           style={{ width: "80%", fontSize: 22 }}
         />
         {isWrong && <h5>Name is required!</h5>}
-        <Button onClick={handleCreate} style={{ width: "50%", height: 50 }}>
+        <Button
+          onClick={handleCreate}
+          style={{ width: "50%", height: 50 }}
+          disabled={isLoading}
+        >
           Create
         </Button>
       </form>

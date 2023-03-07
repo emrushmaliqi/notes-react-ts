@@ -4,18 +4,19 @@ import MDEditor from "@uiw/react-md-editor";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { useNotesContext, useSetNotes } from "../hooks/noteHooks";
-import { NoteType } from "../Types";
 import CreateNote from "./CreateNote";
+import SpinnerElement from "./SpinnerElement";
 
 export default function Note() {
   const { notes, dispatch } = useNotesContext();
   const [isEditing, setIsEditing] = useState(false);
   const params = useParams();
+  const { isLoading, setNotes } = useSetNotes();
   const note = notes.find(n => n._id === params.note);
 
   useEffect(() => {
     if (notes.length === 0) {
-      useSetNotes(dispatch, params.note);
+      setNotes(params.note);
     }
     console.log(notes);
   }, [dispatch]);
@@ -56,6 +57,15 @@ export default function Note() {
     );
   }
 
+  if (isLoading)
+    return (
+      <div
+        className="container d-flex align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <SpinnerElement />
+      </div>
+    );
   return (
     <div className="container">
       <h3>Note doesn't exist</h3>

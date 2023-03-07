@@ -26,13 +26,15 @@ export default function Home() {
   const [showModal, setShowModal] = useState(false);
   const [activeNote, setActiveNote] = useState<NoteType | undefined>();
   const [activeFolder, setActiveFolder] = useState<FolderType | undefined>();
-  const [isLoading, setIsLoading] = useState(true);
-  const { folders, dispatch: foldersDispatch } = useFoldersContext();
-  const { notes, dispatch: notesDispatch } = useNotesContext();
+  const { isLoading, setNotes } = useSetNotes();
+  const { folders } = useFoldersContext();
+  const { notes } = useNotesContext();
+  const deleteNote = useDeleteNote();
+  const deleteFolder = useDeleteFolder();
 
   useEffect(() => {
-    useSetNotes(notesDispatch).then(res => setIsLoading(res));
-  }, [notesDispatch]);
+    setNotes();
+  }, []);
 
   function handleClose() {
     setShowModal(false);
@@ -170,9 +172,9 @@ export default function Home() {
             variant="primary"
             onClick={() => {
               if (activeFolder) {
-                useDeleteFolder(foldersDispatch, activeFolder._id);
+                deleteFolder(activeFolder._id);
               } else if (activeNote) {
-                useDeleteNote(notesDispatch, activeNote._id);
+                deleteNote(activeNote._id);
               }
               handleClose();
             }}

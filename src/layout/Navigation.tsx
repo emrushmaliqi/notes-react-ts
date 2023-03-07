@@ -8,7 +8,10 @@ import styles from "../styleModules/navigation.module.css";
 import { Link } from "react-router-dom";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import { useFoldersContext, useSetFolders } from "../hooks/folderHooks";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useAuthContext, useLogout } from "../hooks/authHooks";
+import Button from "react-bootstrap/Button";
+import SpinnerElement from "../components/SpinnerElement";
 
 interface Props {
   isOpen: boolean;
@@ -17,10 +20,17 @@ interface Props {
 
 export default function Navigation({ isOpen, setIsOpen }: Props) {
   const { folders, dispatch } = useFoldersContext();
+  const { user } = useAuthContext();
+  const logout = useLogout();
+  const { isLoading, setFolders } = useSetFolders();
 
   useEffect(() => {
-    if (folders.length === 0) useSetFolders(dispatch);
+    if (folders.length === 0) setFolders();
   }, []);
+
+  useEffect(() => {
+    console.log(isLoading);
+  }, [isLoading]);
 
   return (
     <>
@@ -37,8 +47,18 @@ export default function Navigation({ isOpen, setIsOpen }: Props) {
       />
       <Offcanvas show={isOpen} onHide={() => setIsOpen(false)}>
         <Offcanvas.Header closeButton>
-          <Offcanvas.Title className="w-100 text-center">
-            <Link to={"/notes"}>All Notes</Link>
+          <Offcanvas.Title className="w-100 px-2 d-flex justify-content-around">
+            {user ? (
+              <>
+                <span>{user.email}</span>
+                <Button onClick={logout}>Log out</Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login">Login</Link>
+                <Link to="/signup">Signup</Link>
+              </>
+            )}
           </Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body
@@ -48,12 +68,18 @@ export default function Navigation({ isOpen, setIsOpen }: Props) {
             alignItems: "center",
           }}
         >
+          <Link
+            to={"/notes"}
+            style={{ fontSize: "22px", fontWeight: "bold", marginTop: "80px" }}
+          >
+            All Notes
+          </Link>
           <div
             style={{
               display: "flex",
               alignItems: "center",
               gap: "8em",
-              marginTop: "100px",
+              marginTop: "40px",
             }}
           >
             <Link to={"/newfolder"} style={{ alignSelf: "flex-start" }}>
@@ -78,9 +104,13 @@ export default function Navigation({ isOpen, setIsOpen }: Props) {
               marginTop: "2em",
             }}
           >
-            All Folders
+            Folders
           </Link>
-          {folders &&
+
+          {isLoading ? (
+            <SpinnerElement />
+          ) : (
+            folders &&
             folders.map(
               folder =>
                 folder._id && (
@@ -100,7 +130,8 @@ export default function Navigation({ isOpen, setIsOpen }: Props) {
                     {folder.name}
                   </Link>
                 )
-            )}
+            )
+          )}
         </Offcanvas.Body>
       </Offcanvas>
     </>

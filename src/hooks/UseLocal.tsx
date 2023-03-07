@@ -20,7 +20,7 @@ export function useLocalFolders(): string[] {
 export const useNoteDelete = (me: string) =>
   setLocal(
     "notes",
-    useLocalNotes().filter(n => n.name !== me)
+    useLocalNotes().filter(n => n.title !== me)
   );
 
 export function useFolderDelete(folder: string): string[] {

@@ -9,11 +9,7 @@ import { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { Link, useParams, useLocation } from "react-router-dom";
-import {
-  useFoldersContext,
-  useSetFolders,
-  useUpdateFolder,
-} from "../hooks/folderHooks";
+import { useFoldersContext } from "../hooks/folderHooks";
 import {
   useDeleteNote,
   useNotesContext,
@@ -30,31 +26,24 @@ export default function Folder() {
   const [folder, setFolder] = useState<FolderType>();
   const params = useParams();
   const location = useLocation();
-  const [isLoading, setIsLoading] = useState(true);
+  const { isLoading, setFolderNotes } = useSetFolderNotes();
+  const deleteNote = useDeleteNote();
 
-  const { folders, dispatch: foldersDispatch } = useFoldersContext();
-  const { notes, dispatch: notesDispatch } = useNotesContext();
-
-  useEffect(() => {
-    setIsLoading(true);
-    if (folders.length === 0) useSetFolders(foldersDispatch, true);
-  }, [foldersDispatch, location]);
+  const { folders } = useFoldersContext();
+  const { notes } = useNotesContext();
 
   useEffect(() => {
     setFolder(folders.find(f => f._id === params.folder));
   }, [folders, location]);
 
   useEffect(() => {
-    if (folder)
-      useSetFolderNotes(notesDispatch, folder._id).then(res =>
-        setIsLoading(res)
-      );
+    if (folder) setFolderNotes(folder._id);
   }, [folder]);
 
   const handleClose = () => setShowModal(false);
 
   function handleDelete() {
-    if (activeNote && folder) useDeleteNote(notesDispatch, activeNote);
+    if (activeNote && folder) deleteNote(activeNote);
     handleClose();
   }
 

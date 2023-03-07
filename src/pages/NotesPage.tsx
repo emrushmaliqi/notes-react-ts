@@ -3,15 +3,15 @@ import { faFileMedical } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import { useNotesContext, useSetNotes } from "../hooks/noteHooks";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import SpinnerElement from "../components/SpinnerElement";
 
 export default function NotesPage() {
   const { notes, dispatch } = useNotesContext();
-  const [isLoading, setIsLoading] = useState(true);
+  const { isLoading, setNotes } = useSetNotes();
 
   useEffect(() => {
-    useSetNotes(dispatch, true).then(res => setIsLoading(res));
+    setNotes(true);
   }, [dispatch]);
 
   useEffect(() => console.log(notes), [notes]);

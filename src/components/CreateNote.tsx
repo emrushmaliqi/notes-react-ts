@@ -4,11 +4,7 @@ import { NoteType } from "../Types";
 import { useLocation, useNavigate } from "react-router";
 import MDEditor from "@uiw/react-md-editor";
 import { Button } from "react-bootstrap";
-import {
-  useCreateNote,
-  useNotesContext,
-  useUpdateNote,
-} from "../hooks/noteHooks";
+import { useCreateNote, useUpdateNote } from "../hooks/noteHooks";
 
 interface Props {
   note?: NoteType;
@@ -16,11 +12,12 @@ interface Props {
 }
 
 export default function CreateNote({ note, setIsEditing }: Props) {
-  const { dispatch } = useNotesContext();
   const navigate = useNavigate();
   const location = useLocation();
   const titleRef = useRef<HTMLInputElement>(null);
   const [noteContent, setNoteContent] = useState<string>();
+  const { isLoading: createLoading, createNote } = useCreateNote();
+  const { isLoading: updateLoading, updateNote } = useUpdateNote();
 
   useEffect(() => {
     if (note) {
@@ -39,10 +36,10 @@ export default function CreateNote({ note, setIsEditing }: Props) {
       };
       if (location.state?.folder) {
         inputNote.folder = location.state.folder;
-        await useCreateNote(dispatch, inputNote);
+        await createNote(inputNote);
         navigate(`/folders/${location.state.folder}`, { replace: true });
       } else {
-        await useCreateNote(dispatch, inputNote);
+        await createNote(inputNote);
         navigate("/", { replace: true });
       }
     }
@@ -51,7 +48,7 @@ export default function CreateNote({ note, setIsEditing }: Props) {
   const editFile = async () => {
     if (note && setIsEditing && titleRef.current) {
       const titleValue = titleRef.current.value;
-      await useUpdateNote(dispatch, {
+      await updateNote({
         _id: note._id,
         content: noteContent ? noteContent : " ",
         title: titleValue ? titleValue : "Untitled",
@@ -104,7 +101,11 @@ export default function CreateNote({ note, setIsEditing }: Props) {
               Go Back
             </Button>
           )}
-          <Button onClick={handleSave} style={{ width: "66%" }}>
+          <Button
+            onClick={handleSave}
+            style={{ width: "66%" }}
+            disabled={createLoading || updateLoading}
+          >
             Save Changes
           </Button>
         </div>

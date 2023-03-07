@@ -15,6 +15,16 @@ export interface FolderType {
   updatedAt?: string;
 }
 
+export interface UserType {
+  email: string;
+  password: string;
+}
+
+export interface UserWithToken {
+  email: string;
+  token: string;
+}
+
 export interface ResponseProps<T> {
   status: number;
   data: T;
