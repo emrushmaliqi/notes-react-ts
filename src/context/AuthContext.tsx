@@ -1,4 +1,14 @@
-import { createContext, ReactNode, Reducer, useReducer, Dispatch } from "react";
+import {
+  createContext,
+  ReactNode,
+  Reducer,
+  useReducer,
+  Dispatch,
+  useEffect,
+} from "react";
+import { UserWithToken } from "../Types";
+
+import jwtDecode, { JwtPayload } from "jwt-decode";
 
 export enum AuthActionKind {
   LOGIN = "LOGIN",
@@ -27,6 +37,7 @@ export const authReducer: Reducer<AuthState, AuthAction> = (
     case AuthActionKind.LOGIN:
       return { user: payload };
     case AuthActionKind.LOGOUT:
+      localStorage.removeItem("user");
       return { user: null };
     default:
       return state;
@@ -36,14 +47,23 @@ export const authReducer: Reducer<AuthState, AuthAction> = (
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, { user: null });
 
-  // useEffect(() => {
-  //   if (localStorage.getItem("user")) {
-  //     dispatch({
-  //       type: AuthActionKind.LOGIN,
-  //       payload: JSON.parse(localStorage.getItem("user")!),
-  //     });
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (localStorage.getItem("user")) {
+      const user: UserWithToken = JSON.parse(localStorage.getItem("user")!);
+      const token: JwtPayload = jwtDecode(user.token);
+      if (token.exp && token.exp * 1000 < Date.now()) {
+        dispatch({
+          type: AuthActionKind.LOGOUT,
+          payload: null,
+        });
+        return;
+      }
+      dispatch({
+        type: AuthActionKind.LOGIN,
+        payload: user,
+      });
+    }
+  }, []);
 
   return (
     <AuthContext.Provider value={{ ...state, dispatch }}>

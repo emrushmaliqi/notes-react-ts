@@ -2,6 +2,7 @@ import { SyntheticEvent, useEffect, useRef } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import { useNavigate } from "react-router";
+import { Link } from "react-router-dom";
 import { useAuthContext, useLogin } from "../hooks/authHooks";
 
 export default function Login() {
@@ -47,6 +48,9 @@ export default function Login() {
         <Button disabled={isLoading} variant="primary" type="submit">
           Login
         </Button>
+        <span className="d-block mt-4">
+          Don't have an account? <Link to="/signup">Sign up here</Link>
+        </span>
       </Form>
     </div>
   );

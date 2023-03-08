@@ -2,6 +2,8 @@ import axios from "axios";
 import { FolderType, NoteType, ResponseProps } from "../Types";
 import { NotesActionKind, NotesContext } from "../context/NotesContext";
 import { useContext, Dispatch, useState } from "react";
+import useConfig from "./useAxiosConfig";
+import { useAuthContext } from "./authHooks";
 
 export const useNotesContext = () => {
   const context = useContext(NotesContext);
@@ -15,6 +17,7 @@ export const useNotesContext = () => {
 export const useSetNotes = () => {
   const [isLoading, setIsloading] = useState(false);
   const { dispatch } = useNotesContext();
+  const { user } = useAuthContext();
 
   // if note is set to false it will get only notes that are not in folders,
   // if it is set to true it will get all notes including folder Notes,
@@ -27,7 +30,7 @@ export const useSetNotes = () => {
       return "api/notes";
     };
     const { status, data }: ResponseProps<NoteType[] | NoteType> =
-      await axios.get(url());
+      await axios.get(url(), useConfig(user?.token));
 
     if (status === 200 && dispatch)
       dispatch({
@@ -44,12 +47,14 @@ export const useSetNotes = () => {
 export const useCreateNote = () => {
   const { dispatch } = useNotesContext();
   const [isLoading, setIsLoading] = useState<boolean>();
+  const { user } = useAuthContext();
 
   const createNote = async (note: NoteType) => {
     setIsLoading(true);
     const { status, data }: ResponseProps<NoteType> = await axios.post(
       `${location.pathname !== "/" ? "../" : ""}api/notes`,
-      note
+      note,
+      useConfig(user?.token)
     );
 
     if (status === 201 && dispatch) {
@@ -63,6 +68,7 @@ export const useCreateNote = () => {
 
 export const useUpdateNote = () => {
   const { dispatch } = useNotesContext();
+  const { user } = useAuthContext();
   const [isLoading, setIsLoading] = useState(false);
 
   const updateNote = async ({
@@ -76,7 +82,8 @@ export const useUpdateNote = () => {
       {
         content,
         title,
-      }
+      },
+      useConfig(user?.token)
     );
 
     if (status === 200 && dispatch) {
@@ -93,10 +100,12 @@ export const useUpdateNote = () => {
 
 export const useDeleteNote = () => {
   const { dispatch } = useNotesContext();
+  const { user } = useAuthContext();
 
   const deleteNote = async (noteId: NoteType["_id"]) => {
     const { status, data }: ResponseProps<NoteType> = await axios.delete(
-      `${noteId ? "../" : ""}api/notes/${noteId}`
+      `${noteId ? "../" : ""}api/notes/${noteId}`,
+      useConfig(user?.token)
     );
 
     if (status === 202 && dispatch) {
@@ -112,6 +121,7 @@ export const useDeleteNote = () => {
 
 export const useSetFolderNotes = () => {
   const { dispatch } = useNotesContext();
+  const { user } = useAuthContext();
   const [isLoading, setIsLoading] = useState(false);
 
   const setFolderNotes = async (folderId: FolderType["_id"] | undefined) => {
@@ -120,7 +130,8 @@ export const useSetFolderNotes = () => {
       return setIsLoading(false);
     }
     const { status, data }: ResponseProps<NoteType[]> = await axios.get(
-      `../api/notes/folder/${folderId}`
+      `../api/notes/folder/${folderId}`,
+      useConfig(user?.token)
     );
 
     if (status === 200 && dispatch) {

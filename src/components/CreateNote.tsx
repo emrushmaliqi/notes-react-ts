@@ -40,7 +40,7 @@ export default function CreateNote({ note, setIsEditing }: Props) {
         navigate(`/folders/${location.state.folder}`, { replace: true });
       } else {
         await createNote(inputNote);
-        navigate("/", { replace: true });
+        navigate("/", { replace: true, state: { newNote: true } });
       }
     }
   };

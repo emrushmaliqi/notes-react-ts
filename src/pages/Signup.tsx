@@ -7,7 +7,7 @@ import { useAuthContext, useSignup } from "../hooks/authHooks";
 export default function Signup() {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
-  const { error, isLoading, signup } = useSignup();
+  let { error, isLoading, signup } = useSignup();
   const { user } = useAuthContext();
   const navigate = useNavigate();
 
@@ -34,7 +34,6 @@ export default function Signup() {
           <Form.Label>Email address</Form.Label>
           <Form.Control ref={emailRef} type="email" placeholder="Enter email" />
         </Form.Group>
-
         <Form.Group className="mb-3" controlId="formBasicPassword">
           <Form.Label>Password</Form.Label>
           <Form.Control

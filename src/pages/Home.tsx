@@ -8,7 +8,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import FolderCard from "../components/FolderCard";
 import NoteCard from "../components/NoteCard";
 import {
@@ -31,9 +31,10 @@ export default function Home() {
   const { notes } = useNotesContext();
   const deleteNote = useDeleteNote();
   const deleteFolder = useDeleteFolder();
+  const location = useLocation();
 
   useEffect(() => {
-    setNotes();
+    if (!location.state?.newNote) setNotes();
   }, []);
 
   function handleClose() {
@@ -47,31 +48,33 @@ export default function Home() {
       <div className="container mt-3">
         <div className="d-flex justify-content-between align-items-center">
           <h2 className="my-5">Folders</h2>
-          <div className="d-flex gap-3">
-            <Link to={"/newfolder"} style={{ alignSelf: "flex-start" }}>
-              <FontAwesomeIcon
-                icon={faFolderPlus}
-                style={{ fontSize: "1.6em", color: "black" }}
-              />
-            </Link>
+          {folders.length > 0 && (
+            <div className="d-flex gap-3">
+              <Link to={"/newfolder"} style={{ alignSelf: "flex-start" }}>
+                <FontAwesomeIcon
+                  icon={faFolderPlus}
+                  style={{ fontSize: "1.6em", color: "black" }}
+                />
+              </Link>
 
-            {folderEditing ? (
-              <FontAwesomeIcon
-                icon={faXmark}
-                style={{ fontSize: "26px", cursor: "pointer" }}
-                onClick={() => setFolderEditing(false)}
-              />
-            ) : (
-              <FontAwesomeIcon
-                icon={faPencil}
-                style={{ fontSize: "22px", cursor: "pointer" }}
-                onClick={() => setFolderEditing(true)}
-              />
-            )}
-          </div>
+              {folderEditing ? (
+                <FontAwesomeIcon
+                  icon={faXmark}
+                  style={{ fontSize: "26px", cursor: "pointer" }}
+                  onClick={() => setFolderEditing(false)}
+                />
+              ) : (
+                <FontAwesomeIcon
+                  icon={faPencil}
+                  style={{ fontSize: "22px", cursor: "pointer" }}
+                  onClick={() => setFolderEditing(true)}
+                />
+              )}
+            </div>
+          )}
         </div>
         <div className="d-flex flex-wrap gap-5">
-          {folders &&
+          {folders.length > 0 ? (
             folders.map(folder => (
               <div className="position-relative" key={folder._id}>
                 <FolderCard folder={folder} />
@@ -95,13 +98,18 @@ export default function Home() {
                   />
                 )}
               </div>
-            ))}
+            ))
+          ) : (
+            <span>
+              There are no Folders <Link to="/newfolder">Create One</Link>
+            </span>
+          )}
         </div>
         <div className="d-flex justify-content-between align-items-center">
           <h2 className="my-5">Notes</h2>
-          {!isLoading && (
+          {!isLoading && notes.length > 0 && (
             <div className="d-flex gap-3">
-              <Link to={"/newnote"}>
+              <Link to={"/newnote"} replace={true}>
                 <FontAwesomeIcon
                   icon={faFileMedical}
                   style={{ fontSize: "1.5em", color: "black" }}
@@ -126,8 +134,12 @@ export default function Home() {
         <div className="d-flex flex-wrap gap-4 my-4">
           {isLoading ? (
             <SpinnerElement />
+          ) : notes.length === 0 ? (
+            <span>
+              There are no out of folder Notes{" "}
+              <Link to="/newnote">Create One</Link>
+            </span>
           ) : (
-            notes &&
             notes.map(note => (
               <div key={note._id} className="position-relative">
                 {noteEditing && (

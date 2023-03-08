@@ -102,7 +102,7 @@ export default function Folder() {
                 className="mx-auto fs-3"
                 style={{ marginTop: "12%" }}
                 to="/newnote"
-                state={{ folder: folder }}
+                state={{ folder: folder._id }}
               >
                 Add new file
               </Link>

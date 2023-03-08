@@ -80,7 +80,6 @@ export const useLogout = () => {
   const { dispatch } = useAuthContext();
 
   const logout = () => {
-    localStorage.removeItem("user");
     if (dispatch) dispatch({ type: AuthActionKind.LOGOUT, payload: null });
   };
 

@@ -19,18 +19,18 @@ interface Props {
 }
 
 export default function Navigation({ isOpen, setIsOpen }: Props) {
-  const { folders, dispatch } = useFoldersContext();
+  const { folders } = useFoldersContext();
   const { user } = useAuthContext();
   const logout = useLogout();
   const { isLoading, setFolders } = useSetFolders();
 
-  useEffect(() => {
-    if (folders.length === 0) setFolders();
-  }, []);
+  // useEffect(() => {
+  //   if (folders.length === 0) setFolders();
+  // }, [location.pathname]);
 
   useEffect(() => {
-    console.log(isLoading);
-  }, [isLoading]);
+    setFolders();
+  }, [user?.email]);
 
   return (
     <>
@@ -48,17 +48,8 @@ export default function Navigation({ isOpen, setIsOpen }: Props) {
       <Offcanvas show={isOpen} onHide={() => setIsOpen(false)}>
         <Offcanvas.Header closeButton>
           <Offcanvas.Title className="w-100 px-2 d-flex justify-content-around">
-            {user ? (
-              <>
-                <span>{user.email}</span>
-                <Button onClick={logout}>Log out</Button>
-              </>
-            ) : (
-              <>
-                <Link to="/login">Login</Link>
-                <Link to="/signup">Signup</Link>
-              </>
-            )}
+            <span>{user?.email}</span>
+            <Button onClick={logout}>Log out</Button>
           </Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body
